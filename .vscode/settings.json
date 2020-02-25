@@ -1,0 +1,36 @@
+{
+  "javascript.referencesCodeLens.enabled": false,
+  //"javascript.validate.enable": false,
+
+  //"javascript.implicitProjectConfig.checkJs": false,
+  
+  "editor.tabSize": 2,
+  "editor.autoIndent": true,
+  
+  "emmet.triggerExpansionOnTab": true,
+
+  // "eslint.validate": [
+  //   "javascript", "html"
+  // ],
+
+  "files.exclude": {
+    "node_modules": true,
+    "package-lock.json": true
+  },
+
+  "todohighlight.keywords":[
+    {
+      "text": "DEBUG",
+      "color": "#ddddff",
+      "backgroundColor": "#2A52BE",
+    }
+  ],
+
+  "explorer.autoReveal": false,
+
+  // "code-runner.executorMap": {
+  //   "javascript": "node"
+  // },
+  //"typescript.tsdk": "node_modules\\typescript\\lib"
+
+}
