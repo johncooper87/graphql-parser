@@ -28,9 +28,9 @@
 
   "explorer.autoReveal": false,
 
-  // "code-runner.executorMap": {
-  //   "javascript": "node"
-  // },
+  "code-runner.executorMap": {
+    "typescript": "node -r ts-node/register"
+  },
   //"typescript.tsdk": "node_modules\\typescript\\lib"
 
 }

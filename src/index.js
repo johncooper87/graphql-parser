@@ -47,44 +47,44 @@ const matchToken = new RegExp(
 
 console.log(matchToken);
 
-class ASTNode {
-  value;
-}
+// class ASTNode {
+//   value;
+// }
 
-class Token {
-  value;
-  start;
+// class Token {
+//   value;
+//   start;
 
-  constructor(value, start) {
-    this.value = value;
-    this.start = start;
-  }
+//   constructor(value, start) {
+//     this.value = value;
+//     this.start = start;
+//   }
 
-  get end() {
-    return this.start + this.value.length;
-  }
-}
+//   get end() {
+//     return this.start + this.value.length;
+//   }
+// }
 
-class NameNode extends ASTNode {
-  value;
-  alias;
-}
+// class NameNode extends ASTNode {
+//   value;
+//   alias;
+// }
 
-class LiteralNode {
-  type;
-  value;
-}
+// class LiteralNode {
+//   type;
+//   value;
+// }
 
-class ArgumentNode {
-  name;
-  value;
-}
+// class ArgumentNode {
+//   name;
+//   value;
+// }
 
-class FieldNode {
-  name;
-  selections;
-  fragments;
-}
+// class FieldNode {
+//   name;
+//   selections;
+//   fragments;
+// }
 
 const query = `
   query operation($limit: Int! $offset: String) {
@@ -121,4 +121,3 @@ const query = `
   res1 = matchToken.exec(query);
   console.log(res1);
   
-"asd"
