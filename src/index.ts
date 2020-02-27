@@ -1,52 +1,75 @@
-const matchToken = [
+// const matchToken = [
 
-  /"(?:.|\s)*?"/,   // string literal
-  /(?:-)?\d+\.\d+/, // float literal
-  /(?:-)?\d+/,      // int literal
-  /\.{3}/,          // include fragment operator
-  /\w+/,            // name identifier or keyword ('fragment' or 'on')
-  /[^\s,]/          // enclosing tokens: '{', '}', '(', ')', '[', ']'; variable identifier - '$'; identifier of required variable - '!'; invalid tokens: ...
+//   // string literal
+//   '"(?:.|\\s)*?"',
+//   // float literal
+//   '(?:-)?\\d+(?:(?:\\.\\d+[eE][-+]?\\d+)|(?:\\.\\d+)|(?:[eE][-+]?\\d+))',
+//   // int literal
+//   '(?:-)?(?:0|[1-9]\\d*)',
+//   // operation type identifier: 'query', 'mutation', 'subscription'
+//   // fragment identifier: 'fragment'
+//   // type condition identifier: 'on'
+//   // definition identifier: 'schema', 'extend', 'interface', 'type', 'implements', 'union', 'enum', 'directive'
+//   // name identifier (operation, variable, type, alias, field, argument)
+//   // boolean literal
+//   // null literal
+//   // enum value
+//   '\\w+',
+//   // '...' - spread operator
+//   // '$' - variable identifier
+//   // '!' - nonnull value identifier
+//   // '@' - directive identifier
+//   // ':', '=', '|'
+//   // separator: '{', '}', '(', ')', '[', ']'
+//   // ... invalid token
+//   '(\\.{3})|([^\\s,])'
   
-].map(exp => `(${exp.source})`).join('|');
+// ].map(exp => `(${exp})`).join('|');
 
-function parse(document: string) {
+// enum TokenKind {
+//   StringLiteral = 1,
+//   FloatLiteral,
+//   IntLiteral,
+//   Name,
+//   Punctuator
+// }
 
-  const _matchTokens = new RegExp(matchToken, 'g');
-  const nextToken = () => _matchTokens.exec(document);
+// class Token {
+//   readonly value: string;
+//   readonly kind: TokenKind;
+//   readonly start: number;
 
+//   constructor(value: string, kind: TokenKind, start: number) {
+//     this.value = value;
+//     this.kind = kind;
+//     this.start = start;
+//   }
 
-}
+//   get end(): number {
+//     return this.start + this.value.length;
+//   }
+// }
 
-class GraphQLParser {
-  source: string;
-  matchToken: RegExp;
+// class Lexer {
+//   readonly document: string;
+//   private matchToken: RegExp;
 
-  constructor(source: string) {
-    this.source = source;
-    this.matchToken = new RegExp(matchToken, 'g');
-  }
+//   constructor(document: string) {
+//     this.document = document;
+//     this.matchToken = new RegExp(matchToken, 'g');
+//   }
 
-  findNextToken() {
-    return this.matchToken.exec(this.source);
-  }
-}
+//   nextToken(): Token {
+//     const token = this.matchToken.exec(this.document);
+//     const tokenKind = token.indexOf(token[0], 1);
+//     return new Token(token[0], tokenKind, token.index);
+//   }
+// }
+
+import { Lexer } from './Lexing';
 
 class ASTNode {
   value;
-}
-
-class Token {
-  value;
-  start;
-
-  constructor(value, start) {
-    this.value = value;
-    this.start = start;
-  }
-
-  get end() {
-    return this.start + this.value.length;
-  }
 }
 
 class NameNode extends ASTNode {
@@ -84,7 +107,7 @@ class FieldNode {
 // `;
 
 const query = `
-  all1Users(limit: -1 offset: -3.5) {
+  all1Users(limit: -1 offset: -3.5e-5) {
     id
   }
 `;
@@ -99,10 +122,14 @@ const query = `
 //   }
 //   {a:5}`;
 
-  const _matchToken = new RegExp(matchToken, 'g');
-  const res = [...query.matchAll(_matchToken)].map(([val]) => val);
-  //const res = matchToken.exec(query);
+  const lexer = new Lexer(query);
+  const res = lexer.nextToken();
   console.log(res);
+
+  // const _matchToken = new RegExp(matchToken, 'g');
+  // //const res = [...query.matchAll(_matchToken)].map(([val]) => val);
+  // const res = _matchToken.exec(query);
+  // console.log(res);
 
   //const res1 = query.match(matchToken);//.map(([val]) => val);
   // let res1 = matchToken.exec(query);
