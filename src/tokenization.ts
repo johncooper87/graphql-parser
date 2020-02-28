@@ -6,22 +6,22 @@ const matchToken = [
   '(?:-)?\\d+(?:(?:\\.\\d+[eE][-+]?\\d+)|(?:\\.\\d+)|(?:[eE][-+]?\\d+))',
   // int literal
   '(?:-)?(?:0|[1-9]\\d*)',
-  // operation type identifier: 'query', 'mutation', 'subscription'
-  // fragment identifier: 'fragment'
-  // type condition identifier: 'on'
-  // definition identifier: 'schema', 'extend', 'interface', 'type', 'implements', 'union', 'enum', 'directive'
-  // name identifier (operation, variable, type, alias, field, argument)
+  // operation type: 'query', 'mutation', 'subscription'
+  // fragment indicator: 'fragment'; type condition: 'on'
+  // (INVALID) 'schema', 'extend', 'interface', 'type', 'implements', 'union', 'enum', 'directive'
+  // identifier (operation, variable, type, alias, field, argument)
   // boolean literal
   // null literal
   // enum value
   '\\w+',
   // '...' - spread operator
-  // '$' - variable identifier
-  // '!' - nonnull value identifier
-  // '@' - directive identifier
-  // ':', '=', '|'
+  // '$' - variable indicator
+  // '!' - nonnull value indicator
+  // '@' - directive indicator
+  // ':', '=',
   // separator: '{', '}', '(', ')', '[', ']'
-  // ... invalid token
+  // (INVALID) '|'
+  // invalid token
   '(\\.{3})|([^\\s,])'
   
 ].map(exp => `(${exp})`).join('|');
@@ -34,7 +34,7 @@ export enum TokenKind {
   Punctuator
 }
 
-export class Token {
+class Token {
   readonly value: string;
   readonly kind: TokenKind;
   readonly start: number;
@@ -50,7 +50,7 @@ export class Token {
   }
 }
 
-export class Lexer {
+export class Tokenizer {
   readonly document: string;
   private matchToken: RegExp;
 
@@ -61,6 +61,7 @@ export class Lexer {
 
   nextToken(): Token {
     const token = this.matchToken.exec(this.document);
+    if (token === null) return null;
     const tokenKind = token.indexOf(token[0], 1);
     return new Token(token[0], tokenKind, token.index);
   }

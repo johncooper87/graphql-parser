@@ -66,7 +66,7 @@
 //   }
 // }
 
-import { Lexer } from './Lexing';
+import { Tokenizer } from './tokenization';
 
 class ASTNode {
   value;
@@ -122,8 +122,8 @@ const query = `
 //   }
 //   {a:5}`;
 
-  const lexer = new Lexer(query);
-  const res = lexer.nextToken();
+  const tokenizer = new Tokenizer(query);
+  const res = tokenizer.nextToken();
   console.log(res);
 
   // const _matchToken = new RegExp(matchToken, 'g');
