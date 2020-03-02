@@ -2,31 +2,35 @@ const searchToken = [
 
   // string literal
   '"(?:.|\\s)*?"',
+
   // float literal
   '(?:-)?\\d+(?:(?:\\.\\d+[eE][-+]?\\d+)|(?:\\.\\d+)|(?:[eE][-+]?\\d+))',
+
   // int literal
   '(?:-)?(?:0|[1-9]\\d*)',
+
   // operation type: 'query', 'mutation', 'subscription'
   // fragment indicator: 'fragment'; type condition: 'on'
-  // (INVALID) 'schema', 'extend', 'interface', 'type', 'implements', 'union', 'enum', 'directive'
+  // (invalid) 'schema', 'extend', 'interface', 'type', 'implements', 'union', 'enum', 'directive'
   // identifier (operation, variable, type, alias, field, argument)
   // boolean literal
   // null literal
   // enum value
   '\\w+',
+  
   // '...' - spread operator
   // '$' - variable indicator
   // '!' - nonnull value indicator
   // '@' - directive indicator
   // ':', '=',
   // separator: '{', '}', '(', ')', '[', ']'
-  // (INVALID) '|'
+  // (invalid) '|'
   // invalid token
   '(\\.{3})|([^\\s,])'
   
 ].map(exp => `(${exp})`).join('|');
 
-export enum TokenKind {
+export const enum TokenKind {
   StringLiteral = 1,
   FloatLiteral,
   IntLiteral,
@@ -40,20 +44,16 @@ export class Token {
   readonly start: number;
 
   constructor(match: RegExpExecArray) {
-    const value = match[0];
-    this.kind = match.indexOf(value, 1);
-    this.value = this.kind === 1 ? value.substring(1, value.length - 1) : value;
+    this.value = match[0];
+    this.kind = match.indexOf(this.value, 1);
     this.start = match.index;
   }
 
   toString() {
-    // if (this.kind === 1) return '"' + this.value + '"';
-    // return "'" + this.value + "'";
-    if (this.kind === 1) return `string "${this.value}"`;
-    if (this.kind === 2) return `float '${this.value}'`;
-    if (this.kind === 3) return `int '${this.value}'`;
-    if (this.kind === 4) return `name '${this.value}'`;
-    return "'" + this.value + "'";
+    return [, 'string ', 'float ', 'int ', 'name ', ''][this.kind]
+    + "'"
+    + this.value
+    + "'";
   }
 }
 

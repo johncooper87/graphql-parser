@@ -105,7 +105,7 @@ class Operation {
 
 class Document {
   operations: Map<string, Operation>  = new Map();
-  fragmentDefenitions: Map<string, Fragment> = new Map();
+  fragmentDefinitions: Map<string, Fragment> = new Map();
 
   constructor(tokenizer: Tokenizer) {
     let token = tokenizer.nextToken();
@@ -117,8 +117,8 @@ class Document {
           token = tokenizer.nextToken();
           if (token === null) tokenizer.emitError(`Expected identifier`);
           if (token.kind !== TokenKind.Name) tokenizer.emitError(`Expected name, found ${token}`);
-          if (this.fragmentDefenitions.has(token.value)) tokenizer.emitError(`Duplicate identifier '${token.value}'`);
-          this.fragmentDefenitions.set(token.value, new Fragment(tokenizer));
+          if (this.fragmentDefinitions.has(token.value)) tokenizer.emitError(`Duplicate identifier '${token.value}'`);
+          this.fragmentDefinitions.set(token.value, new Fragment(tokenizer));
         }
 
         if (token.value === 'query' || token.value === 'mutation' || token.value === 'subscription') {
