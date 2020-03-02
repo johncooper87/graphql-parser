@@ -1,4 +1,4 @@
-const matchToken = [
+const searchToken = [
 
   // string literal
   '"(?:.|\\s)*?"',
@@ -34,35 +34,57 @@ export enum TokenKind {
   Punctuator
 }
 
-class Token {
+export class Token {
   readonly value: string;
   readonly kind: TokenKind;
   readonly start: number;
 
-  constructor(value: string, kind: TokenKind, start: number) {
-    this.value = value;
-    this.kind = kind;
-    this.start = start;
+  constructor(match: RegExpExecArray) {
+    const value = match[0];
+    this.kind = match.indexOf(value, 1);
+    this.value = this.kind === 1 ? value.substring(1, value.length - 1) : value;
+    this.start = match.index;
   }
 
-  get end(): number {
-    return this.start + this.value.length;
+  toString() {
+    // if (this.kind === 1) return '"' + this.value + '"';
+    // return "'" + this.value + "'";
+    if (this.kind === 1) return `string "${this.value}"`;
+    if (this.kind === 2) return `float '${this.value}'`;
+    if (this.kind === 3) return `int '${this.value}'`;
+    if (this.kind === 4) return `name '${this.value}'`;
+    return "'" + this.value + "'";
   }
 }
 
 export class Tokenizer {
-  readonly document: string;
-  private matchToken: RegExp;
+  readonly source: string;
+  private searchToken: RegExp;
+  readonly lastToken: Token;
 
-  constructor(document: string) {
-    this.document = document;
-    this.matchToken = new RegExp(matchToken, 'g');
+  constructor(source: string) {
+    this.source = source;
+    this.searchToken = new RegExp(searchToken, 'g');
   }
 
   nextToken(): Token {
-    const token = this.matchToken.exec(this.document);
-    if (token === null) return null;
-    const tokenKind = token.indexOf(token[0], 1);
-    return new Token(token[0], tokenKind, token.index);
+    //if (this.lastToken === null) return null;
+    const match = this.searchToken.exec(this.source);
+    if (match === null) return null;
+    // @ts-ignore
+    this.lastToken = new Token(match);
+    return this.lastToken;
+  }
+
+  emitError(message: string) {
+    const { lastToken: { start: tokenStart } } = this;
+    const lineStart = this.source.lastIndexOf('\n', tokenStart);
+    const lineEnd = this.source.indexOf('\n', tokenStart);
+    throw new Error(
+      message
+      + this.source.substring(lineStart, lineEnd)
+      + '\n'
+      + ' '.repeat(tokenStart - lineStart - 1) + '^'.repeat(this.lastToken.value.length)
+    );
   }
 }

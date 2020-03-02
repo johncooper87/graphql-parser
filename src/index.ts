@@ -1,3 +1,32 @@
+import { Tokenizer } from './tokenization';
+
+// function parseDocument(document) {
+//   const tokenizer = new Tokenizer(document);
+//   const operationType = tokenizer.nextToken();
+//   if
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // const matchToken = [
 
 //   // string literal
@@ -66,32 +95,7 @@
 //   }
 // }
 
-import { Tokenizer } from './tokenization';
 
-class ASTNode {
-  value;
-}
-
-class NameNode extends ASTNode {
-  value;
-  alias;
-}
-
-class LiteralNode {
-  type;
-  value;
-}
-
-class ArgumentNode {
-  name;
-  value;
-}
-
-class FieldNode {
-  name;
-  selections;
-  fragments;
-}
 
 // const query = `
 //   query operation($limit: Int! $offset: String) {
@@ -107,7 +111,7 @@ class FieldNode {
 // `;
 
 const query = `
-  all1Users(limit: -1 offset: -3.5e-5) {
+  all1Users(limit: -1 offset: -3.5e-5 asd: "asdasd") {
     id
   }
 `;
@@ -123,7 +127,11 @@ const query = `
 //   {a:5}`;
 
   const tokenizer = new Tokenizer(query);
-  const res = tokenizer.nextToken();
+  let res = tokenizer.nextToken();
+  while (res !== null) {
+    console.log(`sad ${res} asd`);
+    res = tokenizer.nextToken();
+  }
   console.log(res);
 
   // const _matchToken = new RegExp(matchToken, 'g');

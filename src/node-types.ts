@@ -1,16 +1,4 @@
-class ASTNode {
-  value;
-}
-
-class NameNode extends ASTNode {
-  value;
-  alias;
-}
-
-class LiteralNode {
-  type;
-  value;
-}
+import { Tokenizer, TokenKind } from "./tokenization";
 
 enum LiteralKind {
   String,
@@ -65,25 +53,35 @@ class Argument {
 class Field {
   alias: string;
   name: string;
-  selectionSet?: Selection[];
+  selectionSet?: SelectionSet;
 }
 
 class InlineFragment {
   typeCondition: string;
-  selectionSet: Field[];
+  selectionSet: SelectionSet;
 }
 
 class Fragment {
   name: string;
   typeCondition: string;
-  selectionSet: Field[];
+  selectionSet: SelectionSet;
+
+  constructor(tokenizer: Tokenizer) {
+    this.name = tokenizer.lastToken.value;
+
+    let token = tokenizer.nextToken();
+    if (token === null) tokenizer.emitError(`Expected type condition`);
+    if (token.kind !== TokenKind.Name && token.value !== 'on') tokenizer.emitError(`Expected 'on', found ${token}`);
+  }
 }
 
-type Selection = Field | InlineFragment[] | Fragment;
-type SelectionSet = Map<string, Selection>;
+//type Selection = Field | Fragment | InlineFragment;
+//type SelectionSet = Selection[];
 
 class SelectionSet {
-  fields: 
+  fields: Map<string, Field>;
+  fragments: Map<string, Fragment>;
+  inlineFragments: Map<string, Field>;
 }
 
 enum OperationType {
@@ -95,11 +93,68 @@ enum OperationType {
 class Operation {
   type: OperationType;
   name?: string;
-  variableDeclarations?: Map<string, Variable>;
-  selectionSet: Selection[];
+  variableDeclarations: Map<string, Variable>;
+  selectionSet: SelectionSet;
+
+  constructor(tokenizer: Tokenizer) {
+    
+  }
 }
 
+
+
 class Document {
-  operations: Map<string, Operation>;
-  fragmentDeclaration?: Map<string, Fragment>;
+  operations: Map<string, Operation>  = new Map();
+  fragmentDefenitions: Map<string, Fragment> = new Map();
+
+  constructor(tokenizer: Tokenizer) {
+    let token = tokenizer.nextToken();
+    while (token !== null) {
+      
+      if (token.kind === TokenKind.Name) {
+
+        if (token.value === 'fragment') {
+          token = tokenizer.nextToken();
+          if (token === null) tokenizer.emitError(`Expected identifier`);
+          if (token.kind !== TokenKind.Name) tokenizer.emitError(`Expected name, found ${token}`);
+          if (this.fragmentDefenitions.has(token.value)) tokenizer.emitError(`Duplicate identifier '${token.value}'`);
+          this.fragmentDefenitions.set(token.value, new Fragment(tokenizer));
+        }
+
+        if (token.value === 'query' || token.value === 'mutation' || token.value === 'subscription') {
+          //const operationType = token.value;
+          token = tokenizer.nextToken();
+          if (token.kind !== TokenKind.Name) {
+
+            if (this.operations.has(token.value)) tokenizer.emitError(`Duplicate identifier '${token.value}'`);
+            this.operations.set(token.value, new Operation(tokenizer));
+
+          } else if (token.value === '{') {
+
+            if (this.operations.has(undefined)) tokenizer.emitError(`Only one anonymous operation allowed`);
+            this.operations.set(token.value, new Operation(tokenizer));
+
+          } else {
+            tokenizer.emitError(`Expected '{', found ${token}`);
+          }
+
+        } else {
+          tokenizer.emitError(`Unexpected token '${token.value}'`);
+        }
+
+      } if (token.value === '{') {
+
+        if (this.operations.has(undefined)) tokenizer.emitError(`Only one anonymous operation allowed`);
+        this.operations.set(token.value, new Operation(tokenizer));
+        
+      }
+      else {
+        tokenizer.emitError(`Unexpected token '${token.value}'`);
+      }
+      //
+
+
+      
+    }
+  }
 }

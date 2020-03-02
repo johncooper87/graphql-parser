@@ -31,6 +31,8 @@
   "code-runner.executorMap": {
     "typescript": "node -r ts-node/register"
   },
+
+  "editor.semanticHighlighting.enabled": true
   //"typescript.tsdk": "node_modules\\typescript\\lib"
 
 }
