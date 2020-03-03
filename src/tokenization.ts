@@ -1,7 +1,7 @@
 const searchToken = [
 
   // string literal
-  '"(?:.|\\s)*?"',
+  '"(?:[^"\\\\]|\\\\.)*"',
 
   // float literal
   '(?:-)?\\d+(?:(?:\\.\\d+[eE][-+]?\\d+)|(?:\\.\\d+)|(?:[eE][-+]?\\d+))',
@@ -50,10 +50,16 @@ export class Token {
   }
 
   toString() {
-    return [, 'string ', 'float ', 'int ', 'name ', ''][this.kind]
-    + "'"
-    + this.value
-    + "'";
+    switch (this.kind) {
+      case 1:
+        return `string ${this.value.replace(/\n/g, '\\n')}`;
+      case 2:
+        return `float ${this.value}`;
+      case 3:
+        return `int ${this.value}`;
+      default:
+        return `'${this.value}'`;
+    }
   }
 }
 

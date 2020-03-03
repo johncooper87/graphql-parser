@@ -13,9 +13,12 @@ import { Tokenizer } from './tokenization';
 //   }
 // `;
 
-const query = `"sd
-  all1Users(limit: -1 offset: -3.5e-5 asd: "asdasd") {
+const query = `
+  all1Users(limit: -1 offset: -3.5e-5 asd: "asd \\"sadsad
+  asasdsad 
+  asdasdasdd") {
     id
+    ... asd
   }
 `;
 

@@ -21,11 +21,15 @@ function mp(targetFn, count = 1000, label) {
 
 const testCount = 1000;
 
-const matchTokenKind = (value, index) => index > 0 && value !== undefined;
-const arr = ["totalUsers", undefined, undefined, undefined, "totalUsers", undefined];
+//const matchTokenKind = (value, index) => index > 0 && value !== undefined;
+function matchTokenKind(value, index) {
+  return value !== undefined && index;
+  //return value != null;
+}
+const arr = ["totalUserstotalUserstotalUserstotalUserstotalUserstotalUserstotalUserstotalUsers", undefined, undefined, undefined, "totalUserstotalUserstotalUserstotalUserstotalUserstotalUserstotalUserstotalUsers", undefined];
 
 function test1() {
-  const res = arr.findIndex(matchTokenKind);
+  const res = arr.findIndex((value, index) => value !== undefined && index > 0 );
   return res;
 }
 
