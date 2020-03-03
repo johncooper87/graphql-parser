@@ -14,7 +14,7 @@ import { Tokenizer } from './tokenization';
 // `;
 
 const query = `
-  all1Users(limit: -1 offset: -3.5e-5 asd: "asd \\"sadsad
+  all1Users(limit: -1 offset: -3.5e-5 asd: "asd \\"sads\\\\\\"ad
   asasdsad 
   asdasdasdd") {
     id

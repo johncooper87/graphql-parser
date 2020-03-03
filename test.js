@@ -24,7 +24,7 @@ const testCount = 1000;
 let query = `
   query operation($limit: Int! $offset: String) {
     users: allUsers(limit: $limit offset: $offset arg1: 1 arg2: 2.3 argg22: 2.3e5 arg3: "asd qwerty
-    zxcv"): {
+    zasdsad asdasdas asdasd asdsad\\"asdxcv"): {
       id
       email
       firstname: name
@@ -40,10 +40,13 @@ for (let i = 0; i < 7; i++) {
 
 const matchToken1 = [
 
-  /"(?:.|\s)*?"/,                         // string literal
-  /(?:-)?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?/, // number literal
-  /\w+/,                                  // name
-  /\.{3}/, /[^\s,]/                       // punctuator
+  /"(?:\\.|[^"\\])*"/,
+  ///"(?:[^"\\]*(?:\\.)?)*"/,
+  ///"(?:\\"|.)*?"/,
+  /(?:-)?\d+(?:(?:\.\d+[eE][-+]?\d+)|(?:\.\d+)|(?:[eE][-+]?\d+))/,
+  /(?:-)?(?:0|[1-9]\d*)/,
+  /\w+/,
+  /\.{3}/, /[^\s,]/
   
 ].map(exp => `(${exp.source})`).join('|');
 
@@ -70,7 +73,7 @@ function test1() {
 }
 
 function test2() {
-  const _matchTokens = new RegExp(matchToken1, 'g');
+  const _matchTokens = new RegExp(matchToken2, 'g');
   let token = _matchTokens.exec(query);
   while (token) {
     token = _matchTokens.exec(query);
@@ -78,7 +81,7 @@ function test2() {
 }
 
 function test3() {
-  const _matchTokens = new RegExp(matchToken2, 'g');
+  const _matchTokens = new RegExp(matchToken1, 'g');
   let token = _matchTokens.exec(query);
   while (token) {
     token = _matchTokens.exec(query);
