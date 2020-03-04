@@ -46,6 +46,7 @@ interface tokenSearchResult {
    * intger part
    */
   2: string;
+  3: string;
 }
 
 export class Token {
