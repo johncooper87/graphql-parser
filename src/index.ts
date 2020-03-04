@@ -13,7 +13,7 @@ import { Tokenizer } from './tokenization';
 //   }
 // `;
 
-const query = `
+const query = ` "asdasd" -2 -3.5e-5 $all @dir Int!
   all1Users(limit: -1 offset: -3.5e-5 asd: "asd \\"sads\\\\\\"ad
   asasdsad 
   asdasdasdd") {

@@ -34,31 +34,28 @@ let query = `
   }
 `;
 
-for (let i = 0; i < 7; i++) {
+for (let i = 0; i < 3; i++) {
   query = query + query;
 }
 
 const matchToken1 = [
 
-  /"(?:\\.|[^"\\])*"/,
-  ///"(?:[^"\\]*(?:\\.)?)*"/,
-  ///"(?:\\"|.)*?"/,
-  /(?:-)?\d+(?:(?:\.\d+[eE][-+]?\d+)|(?:\.\d+)|(?:[eE][-+]?\d+))/,
-  /(?:-)?(?:0|[1-9]\d*)/,
-  /\w+/,
-  /\.{3}/, /[^\s,]/
+  '\\"(?:[^"\\\\]|\\\\.)*\\"',
+  '-?(?:0|[1-9]\\d*)((?:\\.\\d+)?(?:[eE][-+]?\\d+)?)',
+  '\\w+',
+  '[!@$=\\(\\)\\{\\}\\[\\]]|\\.{3}',
+  '[^\\s,]'
   
-].map(exp => `(${exp.source})`).join('|');
+].map(exp => `(${exp})`).join('|');
 
 const matchToken2 = [
 
-  /"(?:.|\s)*?"/,
-  /(?:-)?\d+(?:(?:\.\d+[eE][-+]?\d+)|(?:\.\d+)|(?:[eE][-+]?\d+))/,
-  /(?:-)?(?:0|[1-9]\d*)/,
-  /\w+/,
-  /\.{3}/, /[^\s,]/
+  '\\"(?:[^"\\\\]|\\\\.)*\\"',
+  '-?(?:0|[1-9]\\d*)((?:\\.\\d+)?(?:[eE][-+]?\\d+)?)',
+  '\\w+',
+  '\\.{3}|[^\\s,]'
   
-].map(exp => `(${exp.source})`).join('|');
+].map(exp => `(${exp})`).join('|');
 
 // const _matchTokens = new RegExp(matchToken2, 'g');
 // const res = [...query.matchAll(_matchTokens)];
@@ -80,23 +77,9 @@ function test2() {
   }
 }
 
-function test3() {
-  const _matchTokens = new RegExp(matchToken1, 'g');
-  let token = _matchTokens.exec(query);
-  while (token) {
-    token = _matchTokens.exec(query);
-  }
-}
-
-function test4() {
-  const _matchTokens = new RegExp(matchToken2, 'g');
-  let token = _matchTokens.exec(query);
-  while (token) {
-    token = _matchTokens.exec(query);
-  }
-}
-
 mp(test1, testCount);
 mp(test2, testCount);
-mp(test3, testCount);
-mp(test4, testCount);
+mp(test1, testCount);
+mp(test2, testCount);
+mp(test1, testCount);
+mp(test2, testCount);
