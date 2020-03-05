@@ -6,8 +6,7 @@ const pattern = [
   // newline
   '?:\\r?\\n',
 
-  // integer literal
-  // floating-point literal
+  // numeric literal (integer part)(fractional part + exponential notation)
   '?:-?(0|[1-9]\\d*)((?:\\.\\d+)?(?:[eE][-+]?\\d+)?)',
 
   // operation type: 'query', 'mutation', 'subscription'

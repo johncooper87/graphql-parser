@@ -38,45 +38,122 @@ for (let i = 0; i < 3; i++) {
   query = query + query;
 }
 
-const matchToken2 = [
+const pattern1 = [
 
   '\\"(?:[^"\\\\]|\\\\.)*\\"',
   '?:\\r?\\n',
-  '?:-?(0|[1-9]\\d*)((?:\\.\\d+)?(?:[eE][-+]?\\d+)?)',
+  '?:-?(0|[1-9]\\d*)(\\.\\d+)?([eE][-+]?\\d+)?',
   '\\w+',
   '[!@$=\\(\\)\\{\\}\\[\\]]|\\.{3}',
   '[^\\s,]'
   
 ].map(exp => `(${exp})`).join('|');
 
-const matchToken1 = [
+const pattern2 = [
 
-  '?:\\"((?:[^"\\\\]|\\\\.)*)\\"',
-  '?:-?(0|[1-9]\\d*)((?:\\.\\d+)?(?:[eE][-+]?\\d+)?)',
+  '\\"(?:[^"\\\\]|\\\\.)*\\"',
+  '\\r?\\n',
+  '-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][-+]?\\d+)?',
   '\\w+',
-  '[!@$=\\(\\)\\{\\}\\[\\]]|\\.{3}',
   '[^\\s,]'
   
-].map(exp => `(${exp})`).join('|');
+].map(exp => `(?:${exp})`).join('|');
 
-// const _matchTokens = new RegExp(matchToken2, 'g');
-// const res = [...query.matchAll(_matchTokens)];
-// console.log(res);
+class Token {
+  value;
+  kind;
+  start;
 
-function test1() {
-  const _matchTokens = new RegExp(matchToken1, 'g');
-  let token = _matchTokens.exec(query);
-  while (token) {
-    token = _matchTokens.exec(query);
+  constructor(value, kind, start) {
+    this.value = value;
+    this.kind = kind;
+    this.start = start;
   }
 }
 
-function test2() {
-  const _matchTokens = new RegExp(matchToken2, 'g');
-  let token = _matchTokens.exec(query);
-  while (token) {
-    token = _matchTokens.exec(query);
+class Lexer1 {
+  source;
+  lastToken;
+  scan;
+
+  constructor(source) {
+    this.source = source;
+    const scanner = new RegExp(pattern1, 'g');
+    this.scan = scanner.exec.bind(scanner, this.source);
   }
+
+  nextToken() {
+    const res = this.scan();
+    if (res === null) return null;
+
+    const { 0: lexem, 1: stringLiteral, 2: integerPart, 3: fractionalPart, 4: exponentialNotation, 5: name, 6: punctuator, 7: unexpected, index } = res;
+    //const [ lexem, stringLiteral, integerPart, fractionalPart, exponentialNotation, name, punctuator ] = res;
+
+    if (lexem === '\\n' || lexem === '\\r\\n') return this.nextToken();
+
+    let kind;
+
+    if (name !== undefined)  3;
+    else if (punctuator !== undefined) kind = 4;
+    else if (integerPart !== undefined) {
+      kind = fractionalPart === undefined && exponentialNotation == undefined ? 1 : 2;
+    }
+    else if (stringLiteral !== undefined) kind = 0;
+    
+    this.lastToken = new Token(lexem, kind, res.index);
+    return this.lastToken;
+  }
+}
+
+class Lexer2 {
+  source;
+  lastToken;
+  scan;
+
+  constructor(source) {
+    this.source = source;
+    const scanner = new RegExp(pattern2, 'g');
+    this.scan = scanner.exec.bind(scanner, this.source);
+  }
+
+  nextToken() {
+    const res = this.scan();
+    if (res === null) return null;
+
+    const { 0: lexem, index } = res;
+    if (lexem === '\\n' || lexem === '\\r\\n') return this.nextToken();
+
+    let  kind;
+
+    const code = lexem.charCodeAt(0);
+    if (code === 34) kind = 0;
+    else if ((code >= 48 && code <= 57) || code === 45) {
+      kind = /[.eE]/.test(lexem) ? 2 : 1;
+    }
+    else if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122) || code === 95)  kind = 3;
+    if (code === 33 || code === 36 || code === 40 || code === 41 || code === 61 || code === 91 || code === 93 || code === 123 || code === 125 || lexem === '...') kind = 4;
+
+    this.lastToken = new Token(lexem, kind, index);
+    return this.lastToken;
+  }
+}
+
+function test1() {
+  const lexer = new Lexer1(query);
+  let token = lexer.nextToken();
+  while (token) {
+    token = lexer.nextToken();
+  }
+  return token;
+}
+
+function test2() {
+  const lexer = new Lexer2(query);
+  let token = lexer.nextToken();
+  while (token) {
+    token = lexer.nextToken();
+  }
+  return token;
 }
 
 mp(test1, testCount);
