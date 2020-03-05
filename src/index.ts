@@ -1,4 +1,4 @@
-import { Tokenizer } from './tokenization';
+import { Lexer } from './tokenization';
 
 // const query = `
 //   query operation($limit: Int! $offset: String) {
@@ -32,7 +32,7 @@ const query = ` "asdasd" -2 -3.5e-5 $all @dir Int!
 //   }
 //   {a:5}`;
 
-  const tokenizer = new Tokenizer(query);
+  const tokenizer = new Lexer(query);
   let res = tokenizer.nextToken();
   while (res !== null) {
     console.log(res.kind);

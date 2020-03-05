@@ -1,4 +1,4 @@
-import { Tokenizer, TokenKind } from "./tokenization";
+import { Lexer, TokenKind } from "./tokenization";
 
 enum LiteralKind {
   String,
@@ -66,7 +66,7 @@ class Fragment {
   typeCondition: string;
   selectionSet: SelectionSet;
 
-  constructor(tokenizer: Tokenizer) {
+  constructor(tokenizer: Lexer) {
     this.name = tokenizer.lastToken.value;
 
     let token = tokenizer.nextToken();
@@ -96,7 +96,7 @@ class Operation {
   variableDeclarations: Map<string, Variable>;
   selectionSet: SelectionSet;
 
-  constructor(tokenizer: Tokenizer) {
+  constructor(tokenizer: Lexer) {
     
   }
 }
@@ -107,7 +107,7 @@ class Document {
   operations: Map<string, Operation>  = new Map();
   fragmentDefinitions: Map<string, Fragment> = new Map();
 
-  constructor(tokenizer: Tokenizer) {
+  constructor(tokenizer: Lexer) {
     let token = tokenizer.nextToken();
     while (token !== null) {
       
