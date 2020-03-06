@@ -1,4 +1,4 @@
-import { Lexer } from './tokenization';
+import { Lexer } from './lexing';
 
 // const query = `
 //   query operation($limit: Int! $offset: String) {
@@ -32,14 +32,14 @@ const query = ` "asdasd" -2 -3.5e-5 $all @dir Int!
 //   }
 //   {a:5}`;
 
-  const tokenizer = new Lexer(query);
-  let res = tokenizer.nextToken();
-  while (res !== null) {
-    console.log(res.kind);
-    console.log(`!!! ${res} !!!`);
-    res = tokenizer.nextToken();
+  const lexer = new Lexer(query);
+  let token = lexer.nextToken();
+  while (token !== null) {
+    //console.log(token.kind);
+    console.log(`!!! ${token} !!! ${token.value}`);
+    token = lexer.nextToken();
   }
-  console.log(res);
+  console.log(`!!! ${token} !!!`);
 
   // const _matchToken = new RegExp(matchToken, 'g');
   // //const res = [...query.matchAll(_matchToken)].map(([val]) => val);

@@ -49,6 +49,23 @@ const pattern1 = [
   
 ].map(exp => `(${exp})`).join('|');
 
+const pattern3 = [
+
+  '\\"(?:[^"\\\\]|\\\\.)*\\"',
+  '?:\\r?\\n',
+  '?:-?(0|[1-9]\\d*)(\\.\\d+)?([eE][-+]?\\d+)?',
+  '\\w+',
+  '[!@$=\\(\\)\\{\\}\\[\\]]|\\.{3}',
+  '[^\\s,]'
+  // '\\"(?:[^"\\\\]|\\\\.)*\\"',
+  // '?:\\r?\\n',
+  // '?:(-?(?:0|[1-9]\\d*))(\\.\\d+)?([eE][-+]?\\d+)?',
+  // '\\w+',
+  // '[!@$=\\(\\)\\{\\}\\[\\]]|\\.{3}',
+  // '[^\\s,]'
+  
+].map(exp => `(${exp})`).join('|');
+
 const pattern2 = [
 
   '\\"(?:[^"\\\\]|\\\\.)*\\"',
@@ -105,6 +122,62 @@ class Lexer1 {
   }
 }
 
+class Lexer3 {
+  source;
+  lastToken;
+  scan;
+
+  constructor(source) {
+    this.source = source;
+    const scanner = new RegExp(pattern3, 'g');
+    this.scan = scanner.exec.bind(scanner, this.source);
+  }
+
+  nextToken() {
+    const res = this.scan();
+    if (res === null) return null;
+
+    const { 0: lexem, 1: stringLiteral, 2: integerPart, 3: fractionalPart, 4: eNotation, 5: name, 6: punctuator, index } = res;
+    //const [ lexem, stringLiteral, integerPart, fractionalPart, exponentialNotation, name, punctuator ] = res;
+
+    if (lexem === '\\n' || lexem === '\\r\\n') return this.nextToken();
+
+    let kind;
+
+    // if (name !== undefined)  3;
+    // else if (punctuator !== undefined) kind = 4;
+    // else if (integerPart !== undefined) {
+    //   kind = fractionalPart === undefined && exponentialNotation == undefined ? 1 : 2;
+    // }
+    // else if (stringLiteral !== undefined) kind = 0;
+    // kind =
+    //   name !== undefined ? 3
+    //   : punctuator !== undefined ? 4
+    //   // If the lexeme has the integer part then it is at least a numeric literal
+    //   : integerPart !== undefined ? (
+    //     // If the lexeme does not have the fractional part or exponential notation
+    //     // then it is an integer literal, otherwise it is a floating-point literal
+    //     fractionalPart === undefined && eNotation === undefined
+    //     ? 1 : 2
+    //   ) : stringLiteral !== undefined ? 0
+    //   : undefined;
+    kind =
+      name && 3
+      || (punctuator && 4)
+      // If the lexeme has the integer part then it is at least a numeric literal
+      || (integerPart && (
+        // If the lexeme does not have the fractional part or exponential notation
+        // then it is an integer literal, otherwise it is a floating-point literal
+        fractionalPart && eNotation
+        && 1 || 2
+      )) || (stringLiteral && 0)
+      || undefined;
+    
+    this.lastToken = new Token(lexem, kind, res.index);
+    return this.lastToken;
+  }
+}
+
 class Lexer2 {
   source;
   lastToken;
@@ -148,7 +221,7 @@ function test1() {
 }
 
 function test2() {
-  const lexer = new Lexer2(query);
+  const lexer = new Lexer3(query);
   let token = lexer.nextToken();
   while (token) {
     token = lexer.nextToken();

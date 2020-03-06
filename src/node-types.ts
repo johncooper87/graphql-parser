@@ -1,4 +1,4 @@
-import { Lexer, TokenKind } from "./tokenization";
+import { Lexer, TokenKind } from "./lexing";
 
 enum LiteralKind {
   String,
