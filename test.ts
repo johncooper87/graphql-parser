@@ -1,4 +1,5 @@
-function mp(targetFn, count = 1000, label) {
+//@ts-ignore
+function mp(targetFn, count = 1000, label?) {
   const start = process.hrtime();
   for (let counter = 0; counter < count; counter++) {
     targetFn();
@@ -8,9 +9,13 @@ function mp(targetFn, count = 1000, label) {
   s = ('0000' + s).substring(s.length, s.length + 4);
 
   let ms = (time[1] / 1000000).toString();
+  //@ts-ignore
   ms = ms.split('.');
+  //@ts-ignore
   ms[0] = ('000' + ms[0]).substring(ms[0].length, ms[0].length + 3);
+  //@ts-ignore
   ms[1] = (ms[1] + '000000').substring(0, 6);
+  //@ts-ignore
   ms = ms.join('.');
 
   let _label = label || targetFn.name;
@@ -19,7 +24,8 @@ function mp(targetFn, count = 1000, label) {
   console.log(_label + ':', s, 's, ', ms, 'ms');
 }
 
-// function mp(targetFn, count = 1000, label) {
+// //@ts-ignore
+// function mp(targetFn, count = 1000, label?) {
 //   let time = [0, 0];
 //   for (let counter = 0; counter < count; counter++) {
 //     const start = process.hrtime();
@@ -30,9 +36,13 @@ function mp(targetFn, count = 1000, label) {
 //   s = ('0000' + s).substring(s.length, s.length + 4);
 
 //   let ms = (time[1] / 1000000).toString();
+//   //@ts-ignore
 //   ms = ms.split('.');
+//   //@ts-ignore
 //   ms[0] = ('000' + ms[0]).substring(ms[0].length, ms[0].length + 3);
+//   //@ts-ignore
 //   ms[1] = (ms[1] + '000000').substring(0, 6);
+//   //@ts-ignore
 //   ms = ms.join('.');
 
 //   let _label = label || targetFn.name;
@@ -41,7 +51,8 @@ function mp(targetFn, count = 1000, label) {
 //   console.log(_label + ':', s, 's, ', ms, 'ms');
 // }
 
-const testCount = 100;
+//@ts-ignore
+const testCount = 10000;
 
 let query = `
   query operation($limit: Int! $offset: String) {
@@ -102,13 +113,13 @@ class Token {
   value;
   kind;
   start;
-  source;
+  lexer;
 
-  constructor(value, kind, start, source) {
+  constructor(value: string, kind: number, start: number, lexer?: Lexer1 | Lexer3 | Lexer2 | string) {
     this.value = value;
     this.kind = kind;
     this.start = start;
-    this.source = source;
+    this.lexer = lexer;
   }
 }
 
@@ -134,14 +145,36 @@ class Lexer1 {
 
     let kind;
 
-    if (name !== undefined)  3;
+    if (name !== undefined) kind = 3;
     else if (punctuator !== undefined) kind = 4;
     else if (integerPart !== undefined) {
       kind = fractionalPart === undefined && exponentialNotation == undefined ? 1 : 2;
     }
     else if (stringLiteral !== undefined) kind = 0;
+
+    //const { 0: lexem, 1: stringLiteral, 2: integerPart, 3: fractionalPart, 4: exponentialNotation, 5: name, 6: punctuator, 7: unexpected, index } = res;
+    //const [ lexem, stringLiteral, integerPart, fractionalPart, exponentialNotation, name, punctuator ] = res;
+
+    //if (res[0] === '\\n' || res[0] === '\\r\\n') return this.nextToken();
+
+    //let kind;
+
+    // if (res[5] !== undefined) kind = 3;
+    // else if (res[6] !== undefined) kind = 4;
+    // else if (res[2] !== undefined) {
+    //   kind = res[3] === undefined && res[4] == undefined ? 1 : 2;
+    // }
+    // else if (res[7] !== undefined) kind = 0;
     
-    this.lastToken = new Token(lexem, kind, index, this);
+    // if (res[5]) kind = 3;
+    // else if (res[6]) kind = 4;
+    // else if (res[2]) {
+    //   kind = !res[3] && !res[4] ? 1 : 2;
+    // }
+    // else if (res[7]) kind = 0;
+
+    //@ts-ignore
+    this.lastToken = new Token(res[0], kind, res.index, this.source);
     return this.lastToken;
   }
 }
@@ -161,8 +194,8 @@ class Lexer3 {
     const res = this.scan();
     if (res === null) return null;
 
-    const { 0: lexem, 1: stringLiteral, 2: integerPart, 3: fractionalPart, 4: eNotation, 5: name, 6: punctuator, index } = res;
-    //const [ lexem, stringLiteral, integerPart, fractionalPart, exponentialNotation, name, punctuator ] = res;
+    //const { 0: lexem, 1: stringLiteral, 2: integerPart, 3: fractionalPart, 4: eNotation, 5: name, 6: punctuator, index } = res;
+    const [ lexem, stringLiteral, integerPart, fractionalPart, eNotation, name, punctuator ] = res;
 
     if (lexem === '\\n' || lexem === '\\r\\n') return this.nextToken();
 
@@ -197,7 +230,8 @@ class Lexer3 {
       )) || (stringLiteral && 0)
       || undefined;
     
-    this.lastToken = new Token(lexem, kind, res.index);
+      //@ts-ignore
+    this.lastToken = new Token(lexem, kind, res.index, this);
     return this.lastToken;
   }
 }
@@ -230,11 +264,13 @@ class Lexer2 {
     else if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122) || code === 95)  kind = 3;
     if (code === 33 || code === 36 || code === 40 || code === 41 || code === 61 || code === 91 || code === 93 || code === 123 || code === 125 || lexem === '...') kind = 4;
 
+    
     this.lastToken = new Token(lexem, kind, index , this.source);
     return this.lastToken;
   }
 }
 
+//@ts-ignore
 function test1() {
   const lexer = new Lexer1(query);
   let token = lexer.nextToken();
@@ -244,8 +280,9 @@ function test1() {
   return token;
 }
 
+//@ts-ignore
 function test2() {
-  const lexer = new Lexer2(query);
+  const lexer = new Lexer3(query);
   let token = lexer.nextToken();
   while (token) {
     token = lexer.nextToken();

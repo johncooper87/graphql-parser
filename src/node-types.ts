@@ -107,49 +107,49 @@ class Document {
   operations: Map<string, Operation>  = new Map();
   fragmentDefinitions: Map<string, Fragment> = new Map();
 
-  constructor(tokenizer: Lexer) {
-    let token = tokenizer.nextToken();
+  constructor(lexer: Lexer) {
+    let token = lexer.nextToken();
     while (token !== null) {
       
       if (token.kind === TokenKind.Name) {
 
         if (token.value === 'fragment') {
-          token = tokenizer.nextToken();
-          if (token === null) tokenizer.emitError(`Expected identifier`);
-          if (token.kind !== TokenKind.Name) tokenizer.emitError(`Expected name, found ${token}`);
-          if (this.fragmentDefinitions.has(token.value)) tokenizer.emitError(`Duplicate identifier '${token.value}'`);
-          this.fragmentDefinitions.set(token.value, new Fragment(tokenizer));
+          token = lexer.nextToken();
+          if (token === null) lexer.emitError(`Expected identifier`);
+          if (token.kind !== TokenKind.Name) lexer.emitError(`Expected name, found ${token}`);
+          if (this.fragmentDefinitions.has(token.value)) lexer.emitError(`Duplicate identifier '${token.value}'`);
+          this.fragmentDefinitions.set(token.value, new Fragment(lexer));
         }
 
         if (token.value === 'query' || token.value === 'mutation' || token.value === 'subscription') {
           //const operationType = token.value;
-          token = tokenizer.nextToken();
+          token = lexer.nextToken();
           if (token.kind !== TokenKind.Name) {
 
-            if (this.operations.has(token.value)) tokenizer.emitError(`Duplicate identifier '${token.value}'`);
-            this.operations.set(token.value, new Operation(tokenizer));
+            if (this.operations.has(token.value)) lexer.emitError(`Duplicate identifier '${token.value}'`);
+            this.operations.set(token.value, new Operation(lexer));
 
           } else if (token.value === '{') {
 
-            if (this.operations.has(undefined)) tokenizer.emitError(`Only one anonymous operation allowed`);
-            this.operations.set(token.value, new Operation(tokenizer));
+            if (this.operations.has(undefined)) lexer.emitError(`Only one anonymous operation allowed`);
+            this.operations.set(token.value, new Operation(lexer));
 
           } else {
-            tokenizer.emitError(`Expected '{', found ${token}`);
+            lexer.emitError(`Expected '{', found ${token}`);
           }
 
         } else {
-          tokenizer.emitError(`Unexpected token '${token.value}'`);
+          lexer.emitError(`Unexpected token '${token.value}'`);
         }
 
       } if (token.value === '{') {
 
-        if (this.operations.has(undefined)) tokenizer.emitError(`Only one anonymous operation allowed`);
-        this.operations.set(token.value, new Operation(tokenizer));
+        if (this.operations.has(undefined)) lexer.emitError(`Only one anonymous operation allowed`);
+        this.operations.set(token.value, new Operation(lexer));
         
       }
       else {
-        tokenizer.emitError(`Unexpected token '${token.value}'`);
+        lexer.emitError(`Unexpected token '${token.value}'`);
       }
       //
 
