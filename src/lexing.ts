@@ -32,7 +32,7 @@ const pattern = [
   // 3.1. Deprecated: '|'.
   '[!@$=\\(\\)\\{\\}\\[\\]:]|\\.{3}', // punctuator (7)
 
-  '?:[^\\s,]' // invalid (8)
+  '?:[^\\s,]' // invalid
 
 ].map(exp => `(${exp})`).join('|');
 
@@ -131,15 +131,13 @@ export class Lexer {
       //handle invalid
     }
 
-    //this.lastToken = new Token(lexeme, kind, this.currentLineOffset, offset - this.currentLineOffset);
+    //this.lastToken = new Token(lexeme, kind, this.source, this.currentLine, this.currentLineOffset, offset - this.currentLineOffset);
     //return this.lastToken;
     return new Token(lexeme, kind, this.source, this.currentLine, this.currentLineOffset, offset - this.currentLineOffset);
   }
 }
 
-const MAX_LINE_LENGTH = 30;
-
-export class TokenError extends Error {
+export class InvalidToken extends Error {
   constructor(message: String, token: Token) {
     const { value, source, line, lineOffset, column } = token;
 
@@ -147,32 +145,31 @@ export class TokenError extends Error {
     scanner.lastIndex = lineOffset + column + value.length;
     const nextLineOffset = scanner.exec(source)?.index || source.length;
 
-    const lineLength = nextLineOffset - lineOffset;
-
-    let lineStart: number,
-      tokenOffset: number,
-      lineEnd: number;
-    if (lineLength <= MAX_LINE_LENGTH) {
-      lineStart = lineOffset;
-      tokenOffset = column;
-      lineEnd = nextLineOffset;
-    } else if (value.length >= MAX_LINE_LENGTH) {
-      lineStart = lineOffset + column;
-      tokenOffset = 0;
-      lineEnd = lineStart + MAX_LINE_LENGTH;
-    } else {
-      tokenOffset = lineLength - MAX_LINE_LENGTH + column;
-      const maxOffset = Math.floor((MAX_LINE_LENGTH - value.length) / 2);
-      tokenOffset = tokenOffset > maxOffset ? maxOffset : tokenOffset;
-      lineStart = lineOffset + tokenOffset - column;
-      lineEnd = lineStart + MAX_LINE_LENGTH;
-    }
-
-    super(
-      message + ` at line ${line}, clolumn ${column}.\n`
-      + source.substring(lineStart, lineEnd)
+    super( 
+      message + ` (line ${line}, column ${column})\n`
+      + source.slice(0, nextLineOffset)
       + '\n'
-      + ' '.repeat(tokenOffset) + '^'.repeat(value.length)
+      + ' '.repeat((column || 1) - 1) + '^'.repeat(value.length)
+      + source.slice(nextLineOffset)
     );
+
+    this.name = 'InvalidToken';
   }
 }
+
+// const query = `
+//   query operation($limit: Int) {
+//     users {
+//       firstname
+//       lastname
+//       email
+//     }
+//   }
+// `;
+
+// const lexer = new Lexer(query);
+// let token;
+// for (let i = 0; i < 12; i++) {
+//   token = lexer.nextToken();
+// }
+// throw new InvalidToken('Unexpected token', token);

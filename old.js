@@ -44,3 +44,29 @@
     // else if (invalid !== undefined) {
     //   //handle invalid
     // }
+
+
+    //const MAX_LINE_LENGTH = 30;
+
+
+    //const lineLength = nextLineOffset - lineOffset;
+
+    // let lineStart: number,
+    //   tokenOffset: number,
+    //   lineEnd: number;
+    // if (lineLength <= MAX_LINE_LENGTH) {
+    //   lineStart = lineOffset;
+    //   tokenOffset = column - 1;
+    //   lineEnd = nextLineOffset;
+    // } else if (value.length >= MAX_LINE_LENGTH) {
+    //   lineStart = lineOffset + column;
+    //   tokenOffset = 0;
+    //   lineEnd = lineStart + MAX_LINE_LENGTH;
+    // } else {
+    //   tokenOffset = lineLength - MAX_LINE_LENGTH + column;
+    //   const maxOffset = Math.floor((MAX_LINE_LENGTH - value.length) / 2);
+    //   tokenOffset = tokenOffset > maxOffset ? maxOffset : tokenOffset;
+    //   tokenOffset =- 1;
+    //   lineStart = lineOffset + tokenOffset - column;
+    //   lineEnd = lineStart + MAX_LINE_LENGTH;
+    // }
