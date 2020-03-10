@@ -1,3 +1,5 @@
+import ParseError from './ParseError';
+
 const pattern = [
 
   '\\"(?:[^"\\\\]|\\\\.)*\\"', // string literal (1)
@@ -65,11 +67,11 @@ export class Token {
   toString() {
     switch (this.kind) {
       case TokenKind.StringLiteral:
-        return 'string';
+        return `string: ${this.value}`;
       case TokenKind.IntLiteral:
-        return 'int';
+        return `int: ${this.value}`;
       case TokenKind.FloatLiteral:
-        return 'float';
+        return `float: ${this.value}`;
       default:
         return `'${this.value}'`;
     }
@@ -127,49 +129,13 @@ export class Lexer {
       : stringLiteral !== undefined ? TokenKind.StringLiteral
       : undefined;
 
+    const token = new Token(lexeme, kind, this.source, this.currentLine, this.currentLineOffset, offset - this.currentLineOffset);
     if (kind === undefined){
-      //handle invalid
+      if (lexeme === '"') throw new ParseError(`Unterminated string`, token);
+      else throw new ParseError(`Invalid token '${token.value}'`, token);
     }
 
-    //this.lastToken = new Token(lexeme, kind, this.source, this.currentLine, this.currentLineOffset, offset - this.currentLineOffset);
-    //return this.lastToken;
-    return new Token(lexeme, kind, this.source, this.currentLine, this.currentLineOffset, offset - this.currentLineOffset);
+    //this.lastToken = token;
+    return token;
   }
 }
-
-export class InvalidToken extends Error {
-  constructor(message: String, token: Token) {
-    const { value, source, line, lineOffset, column } = token;
-
-    const scanner = /\r?\n/g;
-    scanner.lastIndex = lineOffset + column + value.length;
-    const nextLineOffset = scanner.exec(source)?.index || source.length;
-
-    super( 
-      message + ` (line ${line}, column ${column})\n`
-      + source.slice(0, nextLineOffset)
-      + '\n'
-      + ' '.repeat((column || 1) - 1) + '^'.repeat(value.length)
-      + source.slice(nextLineOffset)
-    );
-
-    this.name = 'InvalidToken';
-  }
-}
-
-// const query = `
-//   query operation($limit: Int) {
-//     users {
-//       firstname
-//       lastname
-//       email
-//     }
-//   }
-// `;
-
-// const lexer = new Lexer(query);
-// let token;
-// for (let i = 0; i < 12; i++) {
-//   token = lexer.nextToken();
-// }
-// throw new InvalidToken('Unexpected token', token);
