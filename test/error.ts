@@ -14,6 +14,6 @@ const query = `
 const lexer = new Lexer(query);
 let token: Token;
 for (let i = 0; i < 12; i++) {
-  token = lexer.nextToken();
+  token = lexer.read();
 }
 throw new ParseError('Unexpected token', token);

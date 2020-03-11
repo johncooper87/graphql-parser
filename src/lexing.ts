@@ -92,7 +92,7 @@ export class Lexer {
     this.scan = scanner.exec.bind(scanner, this.source);
   }
 
-  nextToken(): Token {
+  read(): Token {
     //if (this.lastToken === null) return null;
 
     const {
@@ -113,7 +113,7 @@ export class Lexer {
     if (newline !== undefined) {
       this.currentLine++;
       this.currentLineOffset = offset;
-      return this.nextToken();
+      return this.read();
     }
 
     const kind =
