@@ -1,5 +1,5 @@
 import { Lexer, Token } from '../src/lexing';
-import ParseError from '../src/ParseError';
+import SyntaxError from '../src/SyntaxError';
 
 const query = `
   query "asd" / asd "operation($limit: Int) {
@@ -16,4 +16,4 @@ let token: Token;
 for (let i = 0; i < 12; i++) {
   token = lexer.read();
 }
-throw new ParseError('Unexpected token', token);
+throw new SyntaxError('Unexpected token', token);

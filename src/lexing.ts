@@ -1,4 +1,4 @@
-import ParseError from './ParseError';
+import { SyntaxError } from './SyntaxError';
 
 const pattern = [
 
@@ -131,8 +131,8 @@ export class Lexer {
 
     const token = new Token(lexeme, kind, this.source, this.currentLine, this.currentLineOffset, offset - this.currentLineOffset);
     if (kind === undefined){
-      if (lexeme === '"') throw new ParseError(`Unterminated string`, token);
-      else throw new ParseError(`Invalid token '${token.value}'`, token);
+      if (lexeme === '"') throw new SyntaxError(`Unterminated string`, token);
+      else throw new SyntaxError(`Invalid token '${token.value}'`, token);
     }
 
     //this.lastToken = token;

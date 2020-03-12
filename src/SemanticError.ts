@@ -1,6 +1,6 @@
 import { Token } from "./lexing";
 
-export default class ParseError extends Error {
+export class SemanticError extends Error {
   constructor(message: string, token?: Token) {
     const { value, source, line, lineOffset, column } = token;
 
@@ -23,6 +23,6 @@ export default class ParseError extends Error {
       );
     }
 
-    this.name = 'ParseError';
+    this.name = 'SemanticError';
   }
 }
