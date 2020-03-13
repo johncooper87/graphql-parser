@@ -1,7 +1,7 @@
 import  { SyntaxError } from './SyntaxError';
 import  { SemanticError } from './SemanticError';
 import { Lexer, Token, TokenKind } from "./lexing";
-import { Document, FragmentDefinition, Operation, SelectionSet, FieldSelection } from './syntax-tree';
+import { Document, FragmentDefinition, Operation, SelectionSet, FieldSelection, Argument } from './syntax-tree';
 
 export class Parser {
 
@@ -90,21 +90,25 @@ export class Parser {
 
     const selectionSet: SelectionSet = [];
 
-    const fieldNodes: Map<string, [FieldSelection, ...Token[]]> = new Map();
+    const fieldTokens: Map<string, [FieldSelection, Token]> = new Map();
     const fragments: Map<string, string> = new Map();
 
     while (token.value !== '}') {
       if (token.kind === TokenKind.Name) {
 
-        const fieldSelection = this.parseField(token.value);
+        const fieldSelection = this.parseFieldSelection(token.value);
+
         const { name } = fieldSelection;
         if (fieldNodes.has(name)) {
           // compare arguments
+          // merge selection set
         } else fieldNodes.set(name, [fieldSelection, token]);
 
         selectionSet.push(fieldSelection);
       }
-      else if (token.value === '...') this.parseFragmentSpread();
+      else if (token.value === '...') {
+        //this.parseFragmentSpread();
+      }
       else throw new SyntaxError(`Unexpected ${token}.`, token);
     }
 
@@ -112,7 +116,7 @@ export class Parser {
 
   }
 
-  private parseField(identifier: string): FieldSelection {
+  private parseFieldSelection(identifier: string): FieldSelection {
     let name: string,
       alias: string,
       selectionSet: SelectionSet;
@@ -129,6 +133,7 @@ export class Parser {
     else name = identifier;
 
     //if (token.value === '(')
+    // parse arguments
 
     if (token.value === '{') selectionSet = this.parseSelectionSet();
 

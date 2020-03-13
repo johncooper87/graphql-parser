@@ -1,6 +1,7 @@
 export class FieldSelection {
   alias?: string;
   name: string;
+  arguments: Argument[];
   selectionSet?: SelectionSet;
 
   constructor(name: string, alias?: string, selectionSet?: SelectionSet) {
@@ -8,6 +9,11 @@ export class FieldSelection {
     this.alias = alias;
     this.selectionSet = selectionSet;
   }
+}
+
+export class Argument {
+  name: string;
+  //value;
 }
 
 export type SelectionSet = (FieldSelection | FragmentSpread | InlineFragment)[]; 

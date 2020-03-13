@@ -132,7 +132,7 @@ export class Lexer {
     const token = new Token(lexeme, kind, this.source, this.currentLine, this.currentLineOffset, offset - this.currentLineOffset);
     if (kind === undefined){
       if (lexeme === '"') throw new SyntaxError(`Unterminated string`, token);
-      else throw new SyntaxError(`Invalid token '${token.value}'`, token);
+      else throw new SyntaxError(`Illegal character '${token.value}'`, token);
     }
 
     //this.lastToken = token;
