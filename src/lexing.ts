@@ -1,5 +1,3 @@
-import { SyntaxError } from './SyntaxError';
-
 const pattern = [
 
   '\\"(?:[^"\\\\]|\\\\.)*\\"', // string literal (1)
@@ -50,15 +48,13 @@ export class Token {
 
   readonly value: string;
   readonly kind: TokenKind;
-  readonly source: string;
   readonly line: number;
   readonly lineOffset: number;
   readonly column: number;
 
-  constructor(value: string, kind: TokenKind, source: string, line: number, lineOffset: number, column: number) {
+  constructor(value: string, kind: TokenKind, line: number, lineOffset: number, column: number) {
     this.value = value;
     this.kind = kind;
-    this.source = source;
     this.line = line;
     this.lineOffset = lineOffset;
     this.column = column;
@@ -78,10 +74,19 @@ export class Token {
   }
 }
 
+class LexicalError extends Error {
+  token: Token;
+
+  constructor(message: string, token: Token) {
+    super(message);
+    this.token = token;
+    this.name = 'LexicalError';
+  }
+}
+
 export class Lexer {
 
   readonly source: string;
-  //private lastToken: Token;
   private currentLine: number = 0;
   private currentLineOffset: number = 0;
   private scan: () => RegExpExecArray;
@@ -93,7 +98,6 @@ export class Lexer {
   }
 
   read(): Token {
-    //if (this.lastToken === null) return null;
 
     const {
       0: lexeme,
@@ -105,10 +109,7 @@ export class Lexer {
       index: offset
     }: any = this.scan() || {};
 
-    if (lexeme === undefined) {
-      //this.lastToken = null;
-      return null;
-    }
+    if (lexeme === undefined) return null;
 
     if (newline !== undefined) {
       this.currentLine++;
@@ -129,13 +130,11 @@ export class Lexer {
       : stringLiteral !== undefined ? TokenKind.StringLiteral
       : undefined;
 
-    const token = new Token(lexeme, kind, this.source, this.currentLine, this.currentLineOffset, offset - this.currentLineOffset);
+    const token = new Token(lexeme, kind, this.currentLine, this.currentLineOffset, offset - this.currentLineOffset);
     if (kind === undefined){
-      if (lexeme === '"') throw new SyntaxError(`Unterminated string`, token);
-      else throw new SyntaxError(`Illegal character '${token.value}'`, token);
+      if (lexeme === '"') throw new LexicalError(`Unterminated string`, token);
+      throw new LexicalError(`Illegal character '${token.value}'`, token);
     }
-
-    //this.lastToken = token;
     return token;
   }
 }
