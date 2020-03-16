@@ -1,7 +1,7 @@
 import  { SyntaxError } from './SyntaxError';
 import  { SemanticError } from './SemanticError';
 import { Lexer, Token, TokenKind } from "./lexing";
-import { Document, FragmentDefinition, Operation, SelectionSet, FieldSelection, Argument } from './syntax-tree';
+import { Document, FragmentDefinition, Operation, SelectionSet, Field, Argument } from './syntax-tree';
 
 export class Parser {
 
@@ -90,7 +90,7 @@ export class Parser {
 
     const selectionSet: SelectionSet = [];
 
-    const fieldTokens: Map<string, [FieldSelection, Token]> = new Map();
+    const fieldTokens: Map<string, [Field, Token]> = new Map();
     const fragments: Map<string, string> = new Map();
 
     while (token.value !== '}') {
@@ -116,7 +116,7 @@ export class Parser {
 
   }
 
-  private parseFieldSelection(identifier: string): FieldSelection {
+  private parseFieldSelection(identifier: string): Field {
     let name: string,
       alias: string,
       selectionSet: SelectionSet;
@@ -137,7 +137,7 @@ export class Parser {
 
     if (token.value === '{') selectionSet = this.parseSelectionSet();
 
-    return new FieldSelection(name, alias, selectionSet);
+    return new Field(name, alias, selectionSet);
   }
 
   private parseFragmentSpread(selectionSet: SelectionSet) {

@@ -123,7 +123,7 @@ export class Argument {
   }
 }
 
-export class FieldSelection {
+export class Field {
   alias?: Identifier;
   name: Identifier;
   args?: Argument[];
@@ -152,7 +152,7 @@ export class InlineFragment {
   }
 }
 
-export type SelectionSet = (FieldSelection | FragmentSpread | InlineFragment)[]; 
+export type SelectionSet = (Field | FragmentSpread | InlineFragment)[]; 
 
 export class FragmentDefinition {
   name: Identifier;
