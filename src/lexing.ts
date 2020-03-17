@@ -24,7 +24,7 @@ const pattern = [
   // 1. Indicators: 
   // 1.1 Directive: '@';
   // 1.2 Variable: '$';
-  // 1.3 Nonull value: '!'.
+  // 1.3 Nonull type: '!'.
   // 2. Operators:
   // 2.1. Fragment spread: '...';
   // 2.2. Assignment: '='.
@@ -131,7 +131,7 @@ export class Lexer {
       : undefined;
 
     const token = new Token(lexeme, kind, this.currentLine, this.currentLineOffset, offset - this.currentLineOffset);
-    if (kind === undefined){
+    if (kind === undefined) {
       if (lexeme === '"') throw new LexicalError(`Unterminated string`, token);
       throw new LexicalError(`Illegal character '${token.value}'`, token);
     }
