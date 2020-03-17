@@ -1,4 +1,4 @@
-import { Token } from './lexing';
+import { Token } from '../lexing';
 
 class Enclosing {
   start: Token;
@@ -20,6 +20,15 @@ abstract class LocalizedNode {
   }
 }
 
+abstract class Name extends LocalizedNode {
+  name: string;
+
+  constructor(token: Token) {
+    super(token);
+    this.name = token.value;
+  }
+}
+
 export class Identifier extends LocalizedNode {
   value: string;
 
@@ -32,8 +41,8 @@ export class Identifier extends LocalizedNode {
 export class Variable extends LocalizedNode {
   name: Identifier;
 
-  constructor(location: Token, name: Identifier) {
-    super(location);
+  constructor(token: Token, name: Identifier) {
+    super(token);
     this.name = name;
   }
 }
@@ -105,13 +114,14 @@ export class ObjectValue extends LocalizedNode {
   }
 }
 
-export class NamedType {
-  name: Identifier;
+// export class NamedType {
+//   name: Identifier;
 
-  constructor(name: Identifier) {
-    this.name = name;
-  }
-}
+//   constructor(name: Identifier) {
+//     this.name = name;
+//   }
+// }
+export class NamedType extends Name {}
 
 export class NonNullType extends LocalizedNode {
   type: NamedType | ListType;
@@ -155,15 +165,16 @@ export class Argument {
   }
 }
 
-export class FragmentSpread {
-  name: Identifier;
+// export class FragmentSpread {
+//   name: Identifier;
+//
+//   constructor(name: Identifier) {
+//     this.name = name;
+//   }
+// }
+export class FragmentSpread extends Name {}
 
-  constructor(name: Identifier) {
-    this.name = name;
-  }
-}
-
-export type Selection = FragmentSpread | InlineFragment | Field;
+type Selection = FragmentSpread | InlineFragment | Field;
 
 export class InlineFragment {
   typeCondition: Identifier;

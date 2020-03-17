@@ -1,7 +1,7 @@
 import  { SyntaxError } from './SyntaxError';
 import  { SemanticError } from './SemanticError';
 import { Lexer, Token, TokenKind } from "./lexing";
-import { Identifier, Document, FragmentDefinition, OperationDefintion, Selection, Field, FragmentSpread, InlineFragment, Argument } from './syntax-tree';
+import { Document, FragmentDefinition, Operation, SelectionSet, Field, Argument } from './syntax-tree';
 
 export class Parser {
 
@@ -82,24 +82,32 @@ export class Parser {
     }
   }
 
-  private parseSelectionSet(): Selection[] {
+  private parseSelectionSet(): SelectionSet {
     //let token = this.lexer.read();
     //if (token.value !== '{') throw new SyntaxError(`Expected 'on', found ${token}.`);
 
     let token = this.lexer.read();
 
-    const selectionSet: Selection[] = [];
+    const selectionSet: SelectionSet = [];
+
+    const fieldTokens: Map<string, [Field, Token]> = new Map();
+    const fragments: Map<string, string> = new Map();
 
     while (token.value !== '}') {
-
       if (token.kind === TokenKind.Name) {
-        const identifier = new Identifier(token);
-        const field = this.parseField(identifier);
-        selectionSet.push(field);
+
+        const fieldSelection = this.parseFieldSelection(token.value);
+
+        const { name } = fieldSelection;
+        if (fieldNodes.has(name)) {
+          // compare arguments
+          // merge selection set
+        } else fieldNodes.set(name, [fieldSelection, token]);
+
+        selectionSet.push(fieldSelection);
       }
       else if (token.value === '...') {
-        const fragmentSpread = this.parseFragmentSpread();
-        selectionSet.push(fragmentSpread);
+        //this.parseFragmentSpread();
       }
       else throw new SyntaxError(`Unexpected ${token}.`, token);
     }
@@ -108,17 +116,17 @@ export class Parser {
 
   }
 
-  private parseField(identifier: Identifier): Field {
-    let name: Identifier,
-      alias: Identifier,
-      selectionSet: Selection[];
+  private parseFieldSelection(identifier: string): Field {
+    let name: string,
+      alias: string,
+      selectionSet: SelectionSet;
 
     let token = this.lexer.read();
     if (token.value === ':') {
 
       token = this.lexer.read();
       if (token.kind !== TokenKind.Name) throw new SyntaxError(`Expected name, found ${token}.`, token);
-      name = new Identifier(token);
+      name = token.value;
       alias = identifier;
       token = this.lexer.read();
     }
@@ -129,30 +137,11 @@ export class Parser {
 
     if (token.value === '{') selectionSet = this.parseSelectionSet();
 
-    return new Field(name, alias, undefined, selectionSet);
+    return new Field(name, alias, selectionSet);
   }
 
-  private parseFragmentSpread() {
-    let token = this.lexer.read();
+  private parseFragmentSpread(selectionSet: SelectionSet) {
 
-    if (token.kind === TokenKind.Name) {
-      const name = new Identifier(token);
-      return new FragmentSpread(name);
-    }
-    else if (token.value === 'on') {
-
-      token = this.lexer.read();
-      if (token.kind !== TokenKind.Name) throw new SyntaxError(`Expected name, found ${token}.`, token);
-      const typeCondition = new Identifier(token);
-
-      token = this.lexer.read();
-      if (token.value !== '{') throw new SyntaxError(`Expected '{', found ${token}.`, token);
-      const selectionSet = this.parseSelectionSet();
-      //if (selectionSet.length === 0) throw new SyntaxError();
-
-      return new InlineFragment(typeCondition, selectionSet);
-    }
-    else throw new SyntaxError(`Expected 'on', found ${token}.`, token);
   }
 
 
