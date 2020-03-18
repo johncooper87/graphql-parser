@@ -1,6 +1,6 @@
 import { Token } from './lexing';
 
-class Enclosing {
+export class Enclosing {
   start: Token;
   end: Token;
 
@@ -32,8 +32,8 @@ export class Identifier extends LocalizedNode {
 export class Variable extends LocalizedNode {
   name: Identifier;
 
-  constructor(location: Token, name: Identifier) {
-    super(location);
+  constructor(indicator: Token, name: Identifier) {
+    super(indicator);
     this.name = name;
   }
 }
@@ -78,9 +78,9 @@ export type Literal = StringValue | IntValue | FloatValue | EnumValue | ListValu
 export type Value = Literal | Variable;
 
 export class ListValue extends LocalizedNode {
-  values?: Value[];
+  values: Value[];
 
-  constructor(location: Enclosing, values?: Value[]) {
+  constructor(location: Enclosing, values: Value[]) {
     super(location);
     this.values = values;
   }
@@ -97,9 +97,9 @@ export class ObjectField {
 }
 
 export class ObjectValue extends LocalizedNode {
-  fields?: ObjectField[];
+  fields: ObjectField[];
 
-  constructor(location: Enclosing, fields?: ObjectField[]) {
+  constructor(location: Enclosing, fields: ObjectField[]) {
     super(location);
     this.fields = fields;
   }

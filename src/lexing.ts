@@ -63,13 +63,14 @@ export class Token {
   toString() {
     switch (this.kind) {
       case TokenKind.StringLiteral:
-        return `string: ${this.value}`;
-      case TokenKind.IntLiteral:
-        return `int: ${this.value}`;
-      case TokenKind.FloatLiteral:
-        return `float: ${this.value}`;
+        return 'string: ' + (this.value.length < 20
+          ? this.value
+          : (this.value.slice(0, 17) + '...')
+        );
+      case TokenKind.IntLiteral || TokenKind.FloatLiteral:
+        return 'number: ' + this.value;
       default:
-        return `'${this.value}'`;
+        return "'" + this.value + "'";
     }
   }
 }
