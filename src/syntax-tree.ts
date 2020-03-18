@@ -74,8 +74,8 @@ export class EnumValue extends LocalizedNode {
   }
 }
 
-type Literal = StringValue | IntValue | FloatValue | EnumValue | ListValue | ObjectValue;
-type Value = Literal | Variable;
+export type Literal = StringValue | IntValue | FloatValue | EnumValue | ListValue | ObjectValue;
+export type Value = Literal | Variable;
 
 export class ListValue extends LocalizedNode {
   values?: Value[];

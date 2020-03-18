@@ -1,7 +1,7 @@
 import  { SyntaxError } from './SyntaxError';
 import  { SemanticError } from './SemanticError';
 import { Lexer, Token, TokenKind } from "./lexing";
-import { Identifier, Document, FragmentDefinition, OperationDefintion, Selection, Field, FragmentSpread, InlineFragment, Argument } from './syntax-tree';
+import { Identifier, Document, FragmentDefinition, OperationDefintion, Selection, Field, FragmentSpread, InlineFragment, Argument, Value, Literal, StringValue, IntValue, FloatValue, Variable, ListValue, ObjectValue, ObjectField } from './syntax-tree';
 
 export class Parser {
 
@@ -130,6 +130,65 @@ export class Parser {
     if (token.value === '{') selectionSet = this.parseSelectionSet();
 
     return new Field(name, alias, undefined, selectionSet);
+  }
+
+  private parseArguments(): Argument[] {
+    const args: Argument[] = [];
+
+    let token = this.lexer.read();
+    while (token.value !== ')') {
+
+      if (token.kind !== TokenKind.Name) throw new SyntaxError(`Expected name, found ${token}.`, token);
+      const name = new Identifier(token);
+
+      token = this.lexer.read();
+      if (token.value !== ':') throw new SyntaxError(`Expected ':', found ${token}.`, token);
+
+      const value = this.parseValue();
+      args.push(new Argument(name, value));
+    }
+
+    return args;
+  }
+
+  private parseValue(): Value {
+
+    let token = this.lexer.read();
+    if (token.value === '$') return this.parseVariable(token);
+    else if (token.value === '[') return this.parseListValue(token);
+    else if (token.value === '{') return this.parseObjectValue(token);
+    else if (token.kind === TokenKind.Punctuator) throw new SyntaxError(`Unexpected ${token}.`, token);
+    else return this.parseLiteral(token);
+  }
+
+  private parseLiteral(token: Token): Literal {
+    switch (token.kind) {
+      case TokenKind.StringLiteral:
+        return new StringValue(token);
+      case TokenKind.IntLiteral:
+        return new IntValue(token);
+      case TokenKind.FloatLiteral:
+      return new FloatValue(token);
+    }
+  }
+
+  private parseVariable(indicator: Token): Variable {
+    const token = this.lexer.read();
+    if (token.kind !== TokenKind.Name) throw new SyntaxError(`Expected name, found ${token}.`, token);
+    const name = new Identifier(token);
+    return new Variable(indicator, name);
+  }
+
+  private parseListValue(startToken: Token): ListValue {
+
+  }
+
+  private parseObjectValue(startToken: Token): ObjectValue {
+
+  }
+
+  private parseObjectField(): ObjectField {
+
   }
 
   private parseFragmentSpread() {
