@@ -31,6 +31,7 @@ export class Identifier extends LocalizedNode {
 
 export class Variable extends LocalizedNode {
   name: Identifier;
+  definition: VariableDefinition;
 
   constructor(indicator: Token, name: Identifier) {
     super(indicator);
@@ -122,7 +123,7 @@ export class NonNullType extends LocalizedNode {
   }
 }
 
-type Type = NamedType | NonNullType | ListType;
+export type Type = NamedType | NonNullType | ListType;
 
 export class ListType extends LocalizedNode {
   type: Type;
@@ -136,9 +137,9 @@ export class ListType extends LocalizedNode {
 export class VariableDefinition {
   variable: Variable;
   type: Type;
-  defaultValue: Literal;
+  defaultValue?: Literal;
 
-  constructor(variable: Variable, type: Type, defaultValue: Literal) {
+  constructor(variable: Variable, type: Type, defaultValue?: Literal) {
     this.variable = variable;
     this.type = type;
     this.defaultValue = defaultValue;
@@ -157,6 +158,7 @@ export class Argument {
 
 export class FragmentSpread {
   name: Identifier;
+  definition: FragmentDefinition;
 
   constructor(name: Identifier) {
     this.name = name;

@@ -1,5 +1,5 @@
 import { Lexer, Token, TokenKind } from "./lexing";
-import { Identifier, Document, FragmentDefinition, OperationDefintion, Selection, Field, FragmentSpread, InlineFragment, Argument, Value, Literal, StringValue, IntValue, FloatValue, Variable, ListValue, ObjectValue, ObjectField, EnumValue, Enclosing } from './syntax-tree';
+import { Identifier, Document, FragmentDefinition, OperationDefintion, Selection, Field, FragmentSpread, InlineFragment, Argument, Type, Value, Literal, StringValue, IntValue, FloatValue, Variable, ListValue, ObjectValue, ObjectField, EnumValue, Enclosing, VariableDefinition, NamedType, NonNullType, ListType } from './syntax-tree';
 
 class SyntaxError extends Error {
   token: Token;
@@ -26,7 +26,7 @@ export class Parser {
   }
 
   parseDocument(): Document {
-    let operationDefinitions: OperationDefintion[],
+    let operationDefinitions: OperationDefintion[] = [],
       fragmentDefinitions: FragmentDefinition[];
 
     let token = this.lexer.read();
@@ -34,15 +34,14 @@ export class Parser {
 
       if (token.kind !== TokenKind.Name && token.value !== '{') throw new SyntaxError(token);
 
-      if (token.kind === TokenKind.Name && token.value !== 'fragment') {
+      if (token.kind === TokenKind.Name && token.value === 'fragment') {
         if (fragmentDefinitions === undefined) fragmentDefinitions = [];
-        const fragmentDefinition = this.parseFragmentDefinition();
-        fragmentDefinitions.push(fragmentDefinition);
+        const definition = this.parseFragmentDefinition();
+        fragmentDefinitions.push(definition);
       }
       
-      if (operationDefinitions === undefined) operationDefinitions = [];
-      const operationDefinition = this.parseOperationDefinition(token);
-      operationDefinitions.push(operationDefinition);
+      const definition = this.parseOperationDefinition(token);
+      operationDefinitions.push(definition);
 
       token = this.lexer.read();
     }
@@ -50,52 +49,122 @@ export class Parser {
     return new Document(operationDefinitions, fragmentDefinitions);
   }
 
+  private parseOperationDefinition(token: Token): OperationDefintion {
+    let type: Identifier,
+      name: Identifier,
+      variableDefinitions: VariableDefinition[],
+      selectionSet: Selection[];
+
+    if (token.kind === TokenKind.Name) {
+
+      if (token.value !== 'query'
+        && token.value !== 'mutation'
+        && token.value !== 'subscription'
+      ) throw new SyntaxError(token);
+      type = new Identifier(token);
+
+      token = this.lexer.read();
+      if (token.kind === TokenKind.Name) {
+
+        name = new Identifier(token);
+        token = this.lexer.read();
+      }
+
+      if (token.value === '(') {
+
+        variableDefinitions = [];
+        token = this.lexer.read();
+        do {
+          const definition = this.parseVariableDefinition(token);
+          variableDefinitions.push(definition);
+    
+        } while (token.value !== ')');
+
+        token = this.lexer.read();
+      }
+
+      if (token.value !== '{') throw new SyntaxError(token, '{');
+    }
+
+    selectionSet = this.parseSelectionSet();
+
+    return new OperationDefintion(selectionSet, type, name, variableDefinitions);
+  }
+
+  private parseVariableDefinition(indicator: Token): VariableDefinition {
+    let variable: Variable,
+      type: Type,
+      defaultValue: Literal;
+    
+    variable = this.parseVariable(indicator);
+
+    let token = this.lexer.read();
+    if (token.value !== ':') throw new SyntaxError(token, ':');
+
+    token = this.lexer.read();
+    type = this.parseType(token);
+
+    token = this.lexer.read();
+    if (token.value === '!') {
+
+      type = new NonNullType(token, type);
+      token = this.lexer.read();
+    }
+
+    if (token.value === '=') {
+      token = this.lexer.read();
+      defaultValue = <Literal>this.parseValue(token, false);
+      token = this.lexer.read();
+    }
+
+    return new VariableDefinition(variable, type, defaultValue);
+  }
+
+  private parseType(token: Token): Type {
+    if (token.kind === TokenKind.Name) {
+
+      const name = new Identifier(token);
+      return new NamedType(name);
+    }
+    else if (token.value === '[') {
+
+      const startToken = token;
+      token = this.lexer.read();
+      let type = this.parseType(token);
+
+      token = this.lexer.read();
+      if (token.value === '!') {
+
+        type = new NonNullType(token, type);
+        token = this.lexer.read();
+      }
+      else if (token.value === ']') {
+        const location = new Enclosing(startToken, token);
+        return new ListType(location, type);
+      }
+      else throw new SyntaxError(token, ']');
+    }
+    else throw new SyntaxError(token);
+  }
+
   private parseFragmentDefinition(): FragmentDefinition {
 
     let token = this.lexer.read();
-    if (token === null) throw new SyntaxError(`Identifier expected.`, token);
-    if (token.kind !== TokenKind.Name) throw new SyntaxError(`Expected name, found ${token}.`, token);
-
-    const name = token.value;
-    if (this.document.fragmentDefinitions.has(name)) {
-      this.pushError(`Duplicate identifier '${name}'.`, token);
-    }
+    if (token.kind !== TokenKind.Name) throw new SyntaxError(token, 'name');
+    const name = new Identifier(token);
 
     token = this.lexer.read();
-    if (token === null) throw new SyntaxError(`Type condition expected.`, token);
-    if (token.value !== 'on') throw new SyntaxError(`Expected 'on', found ${token}.`);
+    if (token.value !== 'on') throw new SyntaxError(token, 'on');
 
     token = this.lexer.read();
-    if (token.kind !== TokenKind.Name) throw new SyntaxError(`Expected name, found ${token}.`, token);
-    const type = token.value;
-    //this.fragmentDefinitions.set(name, new FragmentDefinition(name, lexer));
-  }
+    if (token.kind !== TokenKind.Name) throw new SyntaxError(token, 'name');
+    const typeCondition = new Identifier(token);
 
-  private parseOperationDefinition(): OperationDefintion {
+    token = this.lexer.read();
+    if (token.value !== '{') throw new SyntaxError(token, '{');
+    const selectionSet = this.parseSelectionSet();
 
-    if (token.value !== 'query'
-          && token.value !== 'mutation'
-          && token.value !== 'subscription'
-        ) throw new SyntaxError(token);
-        this.parseOperation(token.value);
-
-    if (nameToken === undefined) {
-
-      const token = this.lexer.read();
-      if (token.kind === TokenKind.Name) this.parseOperation(operationType, token);
-      else if (token.value === '{') this.parseOperation(operationType, null);
-      else throw new SyntaxError(`Expected '{', found ${token}.`, token);
-
-    } else {
-
-      const name = nameToken?.value;
-      if (this.document.operations.has(name)) {
-        if (name === null) throw new SyntaxError(`Only one anonymous operation allowed.`);
-        this.pushError(`Duplicate identifier '${name}'.`, nameToken);
-      }
-      //this.operations.set(name, new Operation(operationType, name, lexer));
-
-    }
+    return new FragmentDefinition(name, typeCondition, selectionSet);
   }
 
   private parseSelectionSet(): Selection[] {
@@ -194,10 +263,12 @@ export class Parser {
     return args;
   }
 
-  private parseValue(token: Token): Value {
+  private parseValue(token: Token, allowVariable = true): Value {
 
     switch (token.value) {
-      case '$': return this.parseVariable(token);
+      case '$':
+        if (allowVariable) return this.parseVariable(token);
+        else throw new SyntaxError(token);
       case '[': return this.parseListValue(token);
       case '{': return this.parseObjectValue(token);
     }
