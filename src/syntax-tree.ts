@@ -66,6 +66,22 @@ export class FloatValue extends LocalizedNode {
   }
 }
 
+export class BooleanValue extends LocalizedNode {
+  value: boolean;
+
+  constructor(token: Token) {
+    super(token);
+    this.value = token.value === 'true' ? true : false;
+  }
+}
+
+export class NullValue extends LocalizedNode {
+
+  constructor(token: Token) {
+    super(token);
+  }
+}
+
 export class EnumValue extends LocalizedNode {
   value: string;
   
@@ -75,7 +91,7 @@ export class EnumValue extends LocalizedNode {
   }
 }
 
-export type Literal = StringValue | IntValue | FloatValue | EnumValue | ListValue | ObjectValue;
+export type Literal = StringValue | IntValue | FloatValue | BooleanValue | NullValue | EnumValue | ListValue | ObjectValue;
 export type Value = Literal | Variable;
 
 export class ListValue extends LocalizedNode {

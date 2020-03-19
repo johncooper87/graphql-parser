@@ -1,12 +1,12 @@
 import { Lexer, Token, TokenKind } from "./lexing";
-import { Identifier, Document, FragmentDefinition, OperationDefintion, Selection, Field, FragmentSpread, InlineFragment, Argument, Type, Value, Literal, StringValue, IntValue, FloatValue, Variable, ListValue, ObjectValue, ObjectField, EnumValue, Enclosing, VariableDefinition, NamedType, NonNullType, ListType } from './syntax-tree';
+import { Identifier, Document, FragmentDefinition, OperationDefintion, Selection, Field, FragmentSpread, InlineFragment, Argument, Type, Value, Literal, StringValue, IntValue, FloatValue, Variable, ListValue, ObjectValue, ObjectField, EnumValue, Enclosing, VariableDefinition, NamedType, NonNullType, ListType, BooleanValue, NullValue } from './syntax-tree';
 
 class SyntaxError extends Error {
   token: Token;
   
   constructor(token: Token, expected?: string) {
 
-    expected = expected.length === 1 ? `'${expected}'` : expected;
+    expected = expected && expected.length === 1 ? `'${expected}'` : expected;
     const message = expected
       ? `Expected ${expected}, found ${token}`
       : `Unexpected ${token}`;
@@ -279,7 +279,12 @@ export class Parser {
       case TokenKind.StringLiteral: return new StringValue(token);
       case TokenKind.IntLiteral: return new IntValue(token);
       case TokenKind.FloatLiteral: return new FloatValue(token);
-      case TokenKind.Name: return new EnumValue(token);
+      case TokenKind.Name:
+        switch (token.value) {
+          case 'null': return new NullValue(token);
+          case 'true' || 'false': return new BooleanValue(token);
+          default: return new EnumValue(token);
+        }
     }
   }
 
