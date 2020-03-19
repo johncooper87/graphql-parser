@@ -1,10 +1,20 @@
 import { Lexer, Token, TokenKind } from "./lexing";
 import { Identifier, Document, FragmentDefinition, OperationDefintion, Selection, Field, FragmentSpread, InlineFragment, Argument, Type, Value, Literal, StringValue, IntValue, FloatValue, Variable, ListValue, ObjectValue, ObjectField, EnumValue, Enclosing, VariableDefinition, NamedType, NonNullType, ListType, BooleanValue, NullValue } from './syntax-tree';
 
+function printTokenKind(kind: TokenKind) {
+  switch (kind) {
+    case TokenKind.StringLiteral: return 'string';
+    case TokenKind.IntLiteral: return 'int';
+    case TokenKind.FloatLiteral: return 'float';
+    case TokenKind.Name: return 'name';
+    case TokenKind.Punctuator: return 'punctuator';
+  }
+}
+
 class SyntaxError extends Error {
   token: Token;
   
-  constructor(token: Token, expected?: string) {
+  constructor(token: Token, expected?: TokenKind | string) {
 
     expected = expected && expected.length === 1 ? `'${expected}'` : expected;
     const message = expected
@@ -22,8 +32,15 @@ export class Parser {
   private lexer: Lexer;
   private token: Token;
 
-  private nextToken(expected: TokenKind | string) {
+  private nextToken(...expected: (TokenKind | string)[]) {
+
     this.token = this.lexer.read();
+
+    if (expected === undefined) return;
+
+    if (typeof expected === 'string') {
+      if (this.token.value !== expected) throw new SyntaxError(this.token, expected);
+    } else if (this.token.kind !== expected) throw new SyntaxError(this.token, expected);
   }
 
   constructor(source: string) {
@@ -154,19 +171,15 @@ export class Parser {
 
   private parseFragmentDefinition(): FragmentDefinition {
 
-    let token = this.lexer.read();
-    if (token.kind !== TokenKind.Name) throw new SyntaxError(token, 'name');
-    const name = new Identifier(token);
+    this.nextToken(TokenKind.Name);
+    const name = new Identifier(this.token);
 
-    token = this.lexer.read();
-    if (token.value !== 'on') throw new SyntaxError(token, 'on');
+    this.nextToken('on');
 
-    token = this.lexer.read();
-    if (token.kind !== TokenKind.Name) throw new SyntaxError(token, 'name');
-    const typeCondition = new Identifier(token);
+    this.nextToken(TokenKind.Name);
+    const typeCondition = new Identifier(this.token);
 
-    token = this.lexer.read();
-    if (token.value !== '{') throw new SyntaxError(token, '{');
+    this.nextToken('{');
     const selectionSet = this.parseSelectionSet();
 
     return new FragmentDefinition(name, typeCondition, selectionSet);
@@ -198,48 +211,42 @@ export class Parser {
   }
 
   private parseFragmentSpread() {
-    let token = this.lexer.read();
+    this.nextToken(TokenKind.Name, 'on');
 
-    if (token.kind === TokenKind.Name) {
-
-      const name = new Identifier(token);
+    if (this.token.kind === TokenKind.Name) {
+      const name = new Identifier(this.token);
       return new FragmentSpread(name);
     }
-    else if (token.value === 'on') {
 
-      token = this.lexer.read();
-      if (token.kind !== TokenKind.Name) throw new SyntaxError(token, 'name');
-      const typeCondition = new Identifier(token);
+    this.nextToken(TokenKind.Name);
+    const typeCondition = new Identifier(this.token);
 
-      token = this.lexer.read();
-      if (token.value !== '{') throw new SyntaxError(token, '{');
-      const selectionSet = this.parseSelectionSet();
+    this.nextToken('{');
+    const selectionSet = this.parseSelectionSet();
 
-      return new InlineFragment(typeCondition, selectionSet);
-    }
-    else throw new SyntaxError(token, 'on');
+    return new InlineFragment(typeCondition, selectionSet);
   }
 
-  private parseField(identifier: Identifier): Field {
+  private parseField(): Field {
     let name: Identifier,
       alias: Identifier,
       args: Argument[],
       selectionSet: Selection[];
 
-    let token = this.lexer.read();
-    if (token.value === ':') {
+    const identifier = new Identifier(this.token);
+    this.nextToken();
+    if (this.token.value === ':') {
 
-      token = this.lexer.read();
-      if (token.kind !== TokenKind.Name) throw new SyntaxError(token, 'name');
-      name = new Identifier(token);
+      this.nextToken(TokenKind.Name);
+      name = new Identifier(this.token);
       alias = identifier;
-      token = this.lexer.read();
+      this.nextToken();
     }
     else name = identifier;
 
-    if (token.value === '(') args = this.parseArguments();
+    if (this.token.value === '(') args = this.parseArguments();
 
-    if (token.value === '{') selectionSet = this.parseSelectionSet();
+    if (this.token.value === '{') selectionSet = this.parseSelectionSet();
 
     return new Field(name, alias, args, selectionSet);
   }

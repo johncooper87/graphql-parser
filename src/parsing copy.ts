@@ -23,7 +23,14 @@ export class Parser {
   private token: Token;
 
   private nextToken(expected: TokenKind | string) {
+
     this.token = this.lexer.read();
+
+    if (expected === undefined) return;
+
+    if (typeof expected === 'string') {
+      if (this.token.value !== expected) throw new SyntaxError(this.token, expected);
+    } else if (this.token.kind !== expected) throw new SyntaxError(this.token, 'name');
   }
 
   constructor(source: string) {
